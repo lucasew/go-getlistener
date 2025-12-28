@@ -36,5 +36,8 @@ func init() {
 	envHost := os.Getenv("HOST")
 	if envHost != "" {
 		HOST = envHost
+		if HOST != "127.0.0.1" && HOST != "localhost" {
+			log.Printf("getlistener: 🛡️ SECURITY WARNING: The HOST environment variable is set to '%s', which may expose the service to the network. Please ensure this is intentional.", HOST)
+		}
 	}
 }
