@@ -2,6 +2,7 @@ package getlistener
 
 import (
 	"log"
+	"log/slog"
 	"net"
 	"os"
 	"strconv"
@@ -37,7 +38,10 @@ func init() {
 	if envHost != "" {
 		HOST = envHost
 		if HOST != "127.0.0.1" && HOST != "localhost" {
-			log.Printf("getlistener: 🛡️ SECURITY WARNING: The HOST environment variable is set to '%s', which may expose the service to the network. Please ensure this is intentional.", HOST)
+			slog.Warn(
+				"SECURITY WARNING: The HOST environment variable is set to a non-local address, which may expose the service to the network. Please ensure this is intentional.",
+				"host", HOST,
+			)
 		}
 	}
 }
