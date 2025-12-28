@@ -1,16 +1,16 @@
 package getlistener
 
 import (
-	"fmt"
+	"log"
+	"log/slog"
 	"net"
 	"os"
 	"strconv"
 )
 
 var (
-	HOST    = "127.0.0.1"
-	PORT    = 0
-	initErr error
+	HOST = "127.0.0.1"
+	PORT = 0
 )
 
 // GetAvailablePort get the number of an available port
@@ -29,7 +29,7 @@ func init() {
 	if envPort != "" {
 		selectedPort, err := strconv.Atoi(envPort)
 		if err != nil {
-			initErr = fmt.Errorf("the environment variable PORT was provided to setup a port but has an invalid value: '%s'", envPort)
+			log.Fatalf("the environment variable PORT was provided to setup a port but has an invalid value: '%s'", envPort)
 			return
 		}
 		PORT = selectedPort
@@ -37,5 +37,11 @@ func init() {
 	envHost := os.Getenv("HOST")
 	if envHost != "" {
 		HOST = envHost
+		if HOST != "127.0.0.1" && HOST != "localhost" {
+			slog.Warn(
+				"SECURITY WARNING: The HOST environment variable is set to a non-local address, which may expose the service to the network. Please ensure this is intentional.",
+				"host", HOST,
+			)
+		}
 	}
 }

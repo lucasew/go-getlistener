@@ -34,9 +34,6 @@ func GetSystemdSocketFD() (int, error) {
 }
 
 func GetListener() (net.Listener, error) {
-	if initErr != nil {
-		return nil, initErr
-	}
 	sdSocket, err := GetSystemdSocketFD()
 	if err != nil && !errors.Is(err, ErrNotPassed) {
 		return nil, err
