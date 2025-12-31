@@ -1,7 +1,7 @@
 package getlistener
 
 import (
-	"log"
+	"fmt"
 	"log/slog"
 	"net"
 	"os"
@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	HOST = "127.0.0.1"
-	PORT = 0
+	HOST    = "127.0.0.1"
+	PORT    = 0
+	initErr error
 )
 
 // GetAvailablePort get the number of an available port
@@ -29,7 +30,7 @@ func init() {
 	if envPort != "" {
 		selectedPort, err := strconv.Atoi(envPort)
 		if err != nil {
-			log.Fatalf("the environment variable PORT was provided to setup a port but has an invalid value: '%s'", envPort)
+			initErr = fmt.Errorf("the environment variable PORT was provided to setup a port but has an invalid value: '%s'", envPort)
 			return
 		}
 		PORT = selectedPort
