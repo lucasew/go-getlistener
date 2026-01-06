@@ -30,7 +30,7 @@ func init() {
 	if envPort != "" {
 		selectedPort, err := strconv.Atoi(envPort)
 		if err != nil {
-			initErr = fmt.Errorf("the environment variable PORT was provided to setup a port but has an invalid value: '%s'", envPort)
+			initErr = fmt.Errorf("the environment variable PORT was provided to setup a port but has an invalid value")
 			return
 		}
 		PORT = selectedPort
