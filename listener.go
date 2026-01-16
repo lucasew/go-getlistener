@@ -8,11 +8,10 @@ import (
 	"strconv"
 )
 
-var (
-	HOST    = "127.0.0.1"
-	PORT    = 0
-	initErr error
-)
+type Config struct {
+	Host string
+	Port int
+}
 
 // GetAvailablePort get the number of an available port
 func GetAvailablePort() (int, error) {
@@ -25,24 +24,28 @@ func GetAvailablePort() (int, error) {
 	return addr.Port, nil
 }
 
-func init() {
+func loadConfig() (*Config, error) {
+	cfg := &Config{
+		Host: "127.0.0.1",
+		Port: 0,
+	}
 	envPort := os.Getenv("PORT")
 	if envPort != "" {
 		selectedPort, err := strconv.Atoi(envPort)
 		if err != nil {
-			initErr = fmt.Errorf("the environment variable PORT was provided to setup a port but has an invalid value: '%s'", envPort)
-			return
+			return nil, fmt.Errorf("the environment variable PORT was provided to setup a port but has an invalid value: '%s'", envPort)
 		}
-		PORT = selectedPort
+		cfg.Port = selectedPort
 	}
 	envHost := os.Getenv("HOST")
 	if envHost != "" {
-		HOST = envHost
-		if HOST != "127.0.0.1" && HOST != "localhost" {
+		cfg.Host = envHost
+		if cfg.Host != "127.0.0.1" && cfg.Host != "localhost" {
 			slog.Warn(
 				"SECURITY WARNING: The HOST environment variable is set to a non-local address, which may expose the service to the network. Please ensure this is intentional.",
-				"host", HOST,
+				"host", cfg.Host,
 			)
 		}
 	}
+	return cfg, nil
 }
