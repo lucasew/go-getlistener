@@ -6,9 +6,9 @@ import (
 )
 
 func GetListener() (net.Listener, error) {
-	host, port, err := loadConfig()
+	cfg, err := loadConfig()
 	if err != nil {
 		return nil, err
 	}
-	return net.Listen("tcp", fmt.Sprintf("%s:%d", host, port))
+	return net.Listen("tcp", fmt.Sprintf("%s:%d", cfg.Host, cfg.Port))
 }

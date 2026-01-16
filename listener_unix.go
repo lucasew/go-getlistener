@@ -34,7 +34,7 @@ func GetSystemdSocketFD() (int, error) {
 }
 
 func GetListener() (net.Listener, error) {
-	host, port, err := loadConfig()
+	cfg, err := loadConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -47,15 +47,15 @@ func GetListener() (net.Listener, error) {
 		log.Printf("getlistener: using socket activation on fd %d", sdSocket)
 		return net.FileListener(f)
 	}
-	if port == 0 {
+	if cfg.Port == 0 {
 		log.Printf("getlistener: PORT wasn't specified, using random one")
 		selectedPort, err := GetAvailablePort()
 		if err != nil {
 			return nil, err
 		}
-		port = selectedPort
+		cfg.Port = selectedPort
 	}
-	listenAddr := fmt.Sprintf("%s:%d", host, port)
+	listenAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	log.Printf("getlistener: listening on %s", listenAddr)
 	return net.Listen("tcp", listenAddr)
 }
