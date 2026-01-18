@@ -47,15 +47,18 @@ func GetListener() (net.Listener, error) {
 		log.Printf("getlistener: using socket activation on fd %d", sdSocket)
 		return net.FileListener(f)
 	}
+	listenAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	if cfg.Port == 0 {
 		log.Printf("getlistener: PORT wasn't specified, using random one")
-		selectedPort, err := GetAvailablePort()
-		if err != nil {
-			return nil, err
-		}
-		cfg.Port = selectedPort
 	}
-	listenAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
-	log.Printf("getlistener: listening on %s", listenAddr)
-	return net.Listen("tcp", listenAddr)
+	// SECURITY-NOTE: We let net.Listen handle port selection to avoid TOCTOU race condition
+	ln, err := net.Listen("tcp", listenAddr)
+	if err != nil {
+		return nil, err
+	}
+	if addr, ok := ln.Addr().(*net.TCPAddr); ok {
+		cfg.Port = addr.Port
+	}
+	log.Printf("getlistener: listening on %s", ln.Addr().String())
+	return ln, nil
 }
