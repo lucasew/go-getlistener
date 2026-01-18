@@ -33,7 +33,7 @@ func loadConfig() (*Config, error) {
 	if envPort != "" {
 		selectedPort, err := strconv.Atoi(envPort)
 		if err != nil {
-			return nil, fmt.Errorf("the environment variable PORT was provided to setup a port but has an invalid value: '%s'", envPort)
+			return nil, fmt.Errorf("the environment variable PORT was provided to setup a port but has an invalid value")
 		}
 		cfg.Port = selectedPort
 	}
