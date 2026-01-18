@@ -14,6 +14,8 @@ var (
 	ErrUnsupportedCase = errors.New("this case is unsupported")
 )
 
+const sdListenFdsStart = 3
+
 // GetSystemdSocketFD gets the systemd socket fd, gives 0 if not passed, error if passed wrong
 func GetSystemdSocketFD() (int, error) {
 	envListenPid := os.Getenv("LISTEN_PID")
@@ -30,7 +32,7 @@ func GetSystemdSocketFD() (int, error) {
 	if envListenFds != "1" {
 		return 0, fmt.Errorf("%w: this library can't deal with more than one socket being passed", ErrUnsupportedCase)
 	}
-	return 3, nil
+	return sdListenFdsStart, nil
 }
 
 func GetListener() (net.Listener, error) {
