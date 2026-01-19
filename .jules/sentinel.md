@@ -1,0 +1,3 @@
+# Sentinel Journal
+
+## 2026-01-19 - Fix TOCTOU in port selection **Vulnerability:** `GetListener` in `listener_unix.go` suffered from a Time-of-Check Time-of-Use (TOCTOU) race condition. It explicitly found a free port by binding and closing a listener, then attempted to bind to that same port again. **Learning:** Explicitly checking for resource availability (like a free port) before acquiring it is dangerous in concurrent systems because the state can change between the check and the use. **Prevention:** Use atomic acquisition methods. In Go, `net.Listen("tcp", ":0")` atomically finds and binds to a free port.
