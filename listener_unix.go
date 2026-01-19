@@ -30,7 +30,8 @@ func GetSystemdSocketFD() (int, error) {
 	if envListenFds != "1" {
 		return 0, fmt.Errorf("%w: this library can't deal with more than one socket being passed", ErrUnsupportedCase)
 	}
-	return 3, nil
+	const sdListenFdsStart = 3
+	return sdListenFdsStart, nil
 }
 
 func GetListener() (net.Listener, error) {
@@ -49,13 +50,14 @@ func GetListener() (net.Listener, error) {
 	}
 	if cfg.Port == 0 {
 		log.Printf("getlistener: PORT wasn't specified, using random one")
-		selectedPort, err := GetAvailablePort()
-		if err != nil {
-			return nil, err
-		}
-		cfg.Port = selectedPort
 	}
+
 	listenAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
-	log.Printf("getlistener: listening on %s", listenAddr)
-	return net.Listen("tcp", listenAddr)
+	ln, err := net.Listen("tcp", listenAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("getlistener: listening on %s", ln.Addr())
+	return ln, nil
 }
