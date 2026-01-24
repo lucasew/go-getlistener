@@ -49,13 +49,12 @@ func GetListener() (net.Listener, error) {
 	}
 	if cfg.Port == 0 {
 		log.Printf("getlistener: PORT wasn't specified, using random one")
-		selectedPort, err := GetAvailablePort()
-		if err != nil {
-			return nil, err
-		}
-		cfg.Port = selectedPort
 	}
 	listenAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
-	log.Printf("getlistener: listening on %s", listenAddr)
-	return net.Listen("tcp", listenAddr)
+	listener, err := net.Listen("tcp", listenAddr)
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("getlistener: listening on %s", listener.Addr())
+	return listener, nil
 }
