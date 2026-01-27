@@ -1,2 +1,36 @@
 [tools]
 go = "latest"
+golangci-lint = "latest"
+
+[tasks."install:go"]
+run = "go mod download"
+
+[tasks.install]
+depends = ["install:*"]
+
+[tasks."lint:golangci-lint"]
+run = "golangci-lint run"
+
+[tasks.lint]
+depends = ["lint:*"]
+
+[tasks."fmt:go"]
+run = "go fmt ./..."
+
+[tasks.fmt]
+depends = ["fmt:*"]
+
+[tasks."test:go"]
+run = "go test -v ./..."
+
+[tasks.test]
+depends = ["test:*"]
+
+[tasks."codegen:go"]
+run = "go generate ./..."
+
+[tasks.codegen]
+depends = ["codegen:*"]
+
+[tasks.ci]
+depends = ["lint", "test"]

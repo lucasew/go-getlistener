@@ -1,3 +1,4 @@
+// Package getlistener provides a way to get a listener from systemd or a random port.
 package getlistener
 
 import (
@@ -8,6 +9,7 @@ import (
 	"strconv"
 )
 
+// Config holds the configuration for the listener.
 type Config struct {
 	Host string
 	Port int
@@ -19,7 +21,7 @@ func GetAvailablePort() (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer listener.Close()
+	defer func() { _ = listener.Close() }()
 	addr := listener.Addr().(*net.TCPAddr)
 	return addr.Port, nil
 }
