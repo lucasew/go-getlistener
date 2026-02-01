@@ -63,15 +63,18 @@ func listenTCP(cfg *Config) (net.Listener, error) {
 	return net.Listen("tcp", listenAddr)
 }
 
+// GetListener returns a listener that is either a systemd socket or a TCP listener
 func GetListener() (net.Listener, error) {
 	cfg, err := loadConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	if l, err := listenSystemd(); err != nil {
+	l, err := listenSystemd()
+	if err != nil {
 		return nil, err
-	} else if l != nil {
+	}
+	if l != nil {
 		return l, nil
 	}
 
