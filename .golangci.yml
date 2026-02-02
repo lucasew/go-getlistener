@@ -1,0 +1,20 @@
+version: 2
+
+run:
+  timeout: 5m
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - misspell
+    - unconvert
+    - unparam
+    - nakedret
+
+linters-settings:
+  goimports:
+    local-prefixes: github.com/lucasew/go-getlistener

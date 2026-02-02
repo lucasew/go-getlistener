@@ -1,2 +1,14 @@
 [tools]
 go = "latest"
+golangci-lint = "latest"
+
+[tasks]
+install = "go mod download"
+"lint:go" = "golangci-lint run"
+lint = { depends = ["lint:*"] }
+"fmt:go" = "go fmt ./..."
+fmt = { depends = ["fmt:*"] }
+test = "go test ./..."
+codegen = "go generate ./..."
+build = "go build -o dist/go-listener-demo ./cmd/go-listener-demo"
+ci = { depends = ["lint", "test"] }
