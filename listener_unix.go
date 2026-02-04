@@ -9,8 +9,11 @@ import (
 )
 
 var (
-	ErrNotPassed       = errors.New("no socket passed")
-	ErrWrongPid        = errors.New("passed the socket to a different PID")
+	// ErrNotPassed is returned when no socket is passed.
+	ErrNotPassed = errors.New("no socket passed")
+	// ErrWrongPid is returned when the socket is passed to a different PID.
+	ErrWrongPid = errors.New("passed the socket to a different PID")
+	// ErrUnsupportedCase is returned when the case is unsupported.
 	ErrUnsupportedCase = errors.New("this case is unsupported")
 )
 
@@ -33,6 +36,7 @@ func GetSystemdSocketFD() (int, error) {
 	return 3, nil
 }
 
+// GetListener returns a listener based on the configuration or systemd socket.
 func GetListener() (net.Listener, error) {
 	cfg, err := loadConfig()
 	if err != nil {

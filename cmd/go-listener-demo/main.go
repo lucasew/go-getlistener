@@ -1,3 +1,4 @@
+// Package main implements a demo server.
 package main
 
 import (
@@ -9,8 +10,8 @@ import (
 
 type Server struct{}
 
-func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "works!")
+func (s Server) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
+	_, _ = fmt.Fprintf(w, "works!")
 }
 
 func main() {
