@@ -33,20 +33,13 @@ func GetSystemdSocketFD() (int, error) {
 	return 3, nil
 }
 
-func GetListener() (net.Listener, error) {
-	cfg, err := loadConfig()
-	if err != nil {
-		return nil, err
-	}
-	sdSocket, err := GetSystemdSocketFD()
-	if err != nil && !errors.Is(err, ErrNotPassed) {
-		return nil, err
-	}
-	if sdSocket != 0 {
-		f := os.NewFile(uintptr(sdSocket), "sd_socket")
-		log.Printf("getlistener: using socket activation on fd %d", sdSocket)
-		return net.FileListener(f)
-	}
+func listenSystemd(fd int) (net.Listener, error) {
+	f := os.NewFile(uintptr(fd), "sd_socket")
+	log.Printf("getlistener: using socket activation on fd %d", fd)
+	return net.FileListener(f)
+}
+
+func listenTCP(cfg *Config) (net.Listener, error) {
 	if cfg.Port == 0 {
 		log.Printf("getlistener: PORT wasn't specified, using random one")
 	}
@@ -58,4 +51,19 @@ func GetListener() (net.Listener, error) {
 	}
 	log.Printf("getlistener: listening on %s", ln.Addr())
 	return ln, nil
+}
+
+func GetListener() (net.Listener, error) {
+	cfg, err := loadConfig()
+	if err != nil {
+		return nil, err
+	}
+	sdSocket, err := GetSystemdSocketFD()
+	if err != nil && !errors.Is(err, ErrNotPassed) {
+		return nil, err
+	}
+	if sdSocket != 0 {
+		return listenSystemd(sdSocket)
+	}
+	return listenTCP(cfg)
 }
