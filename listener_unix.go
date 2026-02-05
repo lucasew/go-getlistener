@@ -33,20 +33,15 @@ func GetSystemdSocketFD() (int, error) {
 	return 3, nil
 }
 
-func GetListener() (net.Listener, error) {
-	cfg, err := loadConfig()
-	if err != nil {
-		return nil, err
-	}
-	sdSocket, err := GetSystemdSocketFD()
-	if err != nil && !errors.Is(err, ErrNotPassed) {
-		return nil, err
-	}
-	if sdSocket != 0 {
-		f := os.NewFile(uintptr(sdSocket), "sd_socket")
-		log.Printf("getlistener: using socket activation on fd %d", sdSocket)
-		return net.FileListener(f)
-	}
+// listenSystemd creates a listener from a systemd socket file descriptor.
+func listenSystemd(fd int) (net.Listener, error) {
+	f := os.NewFile(uintptr(fd), "sd_socket")
+	defer f.Close()
+	return net.FileListener(f)
+}
+
+// listenTCP creates a standard TCP listener based on the configuration.
+func listenTCP(cfg *Config) (net.Listener, error) {
 	if cfg.Port == 0 {
 		log.Printf("getlistener: PORT wasn't specified, using random one")
 	}
@@ -58,4 +53,19 @@ func GetListener() (net.Listener, error) {
 	}
 	log.Printf("getlistener: listening on %s", ln.Addr())
 	return ln, nil
+}
+
+func GetListener() (net.Listener, error) {
+	cfg, err := loadConfig()
+	if err != nil {
+		return nil, err
+	}
+	sdSocket, err := GetSystemdSocketFD()
+	if err != nil && !errors.Is(err, ErrNotPassed) {
+		return nil, err
+	}
+	if sdSocket != 0 {
+		return listenSystemd(sdSocket)
+	}
+	return listenTCP(cfg)
 }
