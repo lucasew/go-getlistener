@@ -33,12 +33,14 @@ func GetSystemdSocketFD() (int, error) {
 	return 3, nil
 }
 
+// listenSystemd creates a listener from a systemd socket file descriptor.
 func listenSystemd(fd int) (net.Listener, error) {
 	f := os.NewFile(uintptr(fd), "sd_socket")
 	log.Printf("getlistener: using socket activation on fd %d", fd)
 	return net.FileListener(f)
 }
 
+// listenTCP creates a standard TCP listener based on the configuration.
 func listenTCP(cfg *Config) (net.Listener, error) {
 	if cfg.Port == 0 {
 		log.Printf("getlistener: PORT wasn't specified, using random one")
