@@ -36,7 +36,7 @@ func GetSystemdSocketFD() (int, error) {
 // listenSystemd creates a listener from a systemd socket file descriptor.
 func listenSystemd(fd int) (net.Listener, error) {
 	f := os.NewFile(uintptr(fd), "sd_socket")
-	log.Printf("getlistener: using socket activation on fd %d", fd)
+	defer f.Close()
 	return net.FileListener(f)
 }
 
