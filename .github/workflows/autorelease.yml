@@ -12,7 +12,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  ci_pipeline:
+  autorelease:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
