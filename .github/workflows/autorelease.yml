@@ -21,7 +21,14 @@ jobs:
 
       - uses: jdx/mise-action@v2
         with:
+          version: latest
           install: true
+
+      - name: Trust mise config
+        run: mise trust
+
+      - name: Debug mise
+        run: mise version && mise doctor
 
       - name: Install dependencies
         run: mise run install
