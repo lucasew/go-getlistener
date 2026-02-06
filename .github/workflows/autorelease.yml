@@ -24,7 +24,7 @@ jobs:
           install: true
 
       - name: Trust mise config
-        run: mise trust
+        run: mise trust --yes
 
       - name: Debug mise
         run: mise version && mise doctor
