@@ -3,7 +3,7 @@ package getlistener
 import (
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"net"
 	"os"
 )
@@ -43,7 +43,7 @@ func listenSystemd(fd int) (net.Listener, error) {
 // listenTCP creates a standard TCP listener based on the configuration.
 func listenTCP(cfg *Config) (net.Listener, error) {
 	if cfg.Port == 0 {
-		log.Printf("getlistener: PORT wasn't specified, using random one")
+		slog.Info("getlistener: PORT wasn't specified, using random one")
 	}
 	listenAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 
@@ -51,7 +51,7 @@ func listenTCP(cfg *Config) (net.Listener, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("getlistener: listening on %s", ln.Addr())
+	slog.Info("getlistener: listening", "address", ln.Addr())
 	return ln, nil
 }
 
