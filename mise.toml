@@ -1,3 +1,42 @@
 [tools]
 go = "1.22"
 golangci-lint = "1.60.1"
+
+[tasks.install]
+depends = ["install:*"]
+
+[tasks."install:go"]
+run = "go mod download"
+
+[tasks.codegen]
+depends = ["codegen:*"]
+
+[tasks."codegen:go"]
+run = "go generate ./..."
+
+[tasks.test]
+depends = ["test:*"]
+
+[tasks."test:go"]
+run = "go test -v -cover ./..."
+
+[tasks.fmt]
+depends = ["fmt:*"]
+
+[tasks."fmt:go"]
+run = "go fmt ./..."
+
+[tasks.lint]
+depends = ["lint:*"]
+
+[tasks."lint:golangci-lint"]
+run = "golangci-lint run ./..."
+
+[tasks.build]
+depends = ["build:*"]
+
+[tasks."build:go"]
+run = "mkdir -p dist && go build -o dist/go-listener-demo ./cmd/go-listener-demo"
+
+[tasks.ci]
+depends = ["lint", "test", "build"]
