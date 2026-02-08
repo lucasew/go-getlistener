@@ -8,12 +8,21 @@ import (
 	"strconv"
 )
 
+// Config holds the configuration for the TCP listener.
 type Config struct {
+	// Host is the IP address or hostname to bind to.
+	// Defaults to "127.0.0.1" if not specified.
 	Host string
+	// Port is the TCP port number to listen on.
+	// If 0, a random available port will be chosen.
 	Port int
 }
 
-// GetAvailablePort get the number of an available port
+// GetAvailablePort returns a random available TCP port number.
+//
+// Warning: This function is vulnerable to Time-of-Check Time-of-Use (TOCTOU) race conditions.
+// The port returned may be claimed by another process before it can be used.
+// Prefer using GetListener with Port set to 0 to atomically bind to a random port.
 func GetAvailablePort() (int, error) {
 	listener, err := net.Listen("tcp", ":0")
 	if err != nil {
@@ -24,6 +33,14 @@ func GetAvailablePort() (int, error) {
 	return addr.Port, nil
 }
 
+// loadConfig reads configuration from environment variables.
+//
+// It checks:
+//   - PORT: The port number to listen on. Defaults to 0 (random port) if not set.
+//   - HOST: The hostname or IP to bind to. Defaults to "127.0.0.1" if not set.
+//
+// It returns an error if PORT contains an invalid integer.
+// It logs a security warning if HOST is set to a non-local address.
 func loadConfig() (*Config, error) {
 	cfg := &Config{
 		Host: "127.0.0.1",
