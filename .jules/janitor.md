@@ -7,3 +7,5 @@ This journal is a record of CRITICAL refactoring learnings for this codebase. It
 **Root Cause:** The original code prioritized immediate feedback for a configuration error over library safety, not considering that libraries should not make termination decisions for the consumer.
 **Solution:** The `init()` function was refactored to store any parsing errors in a package-level variable. The public `GetListener()` function now checks this variable upon being called and returns the error, allowing the application to handle it gracefully.
 **Pattern:** Libraries must not call `os.Exit()` or `log.Fatalf()`. Initialization or configuration errors should be captured and exposed as return values from the library's public functions.
+
+- 2026-02-08: Error messages must use correct grammar and professional tone.
