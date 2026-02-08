@@ -1,6 +1,6 @@
 [tools]
 go = "1.22"
-golangci-lint = "1.60.1"
+golangci-lint = "1.61.0"
 
 [tasks.ci]
 depends = ["lint", "test", "build"]
@@ -9,13 +9,13 @@ depends = ["lint", "test", "build"]
 depends = ["lint:*"]
 
 [tasks."lint:go"]
-run = "golangci-lint run"
+run = "golangci-lint run ./..."
 
 [tasks.test]
 depends = ["test:*"]
 
 [tasks."test:go"]
-run = "go test ./..."
+run = "go test -v ./..."
 
 [tasks.build]
 depends = ["build:*"]
