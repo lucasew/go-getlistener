@@ -3,10 +3,7 @@ go = "1.22"
 golangci-lint = "1.60.1"
 
 [tasks.ci]
-depends = ["setup", "lint", "test", "build"]
-
-[tasks.setup]
-run = "go version && golangci-lint --version"
+depends = ["lint", "test", "build"]
 
 [tasks.lint]
 depends = ["lint:go"]
@@ -24,4 +21,4 @@ run = "go test -v ./..."
 depends = ["build:go"]
 
 [tasks."build:go"]
-run = "mkdir -p dist && go build -o dist/go-listener-demo cmd/go-listener-demo/main.go"
+run = "go build -v ./..."
