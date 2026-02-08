@@ -12,13 +12,13 @@ run = "go test -v ./..."
 run = "mkdir -p dist && go build -o dist/go-listener-demo cmd/go-listener-demo/main.go"
 
 [tasks.lint]
-depends = ["lint:*"]
+depends = ["lint:go"]
 
 [tasks.test]
-depends = ["test:*"]
+depends = ["test:go"]
 
 [tasks.build]
-depends = ["build:*"]
+depends = ["build:go"]
 
 [tasks.ci]
 depends = ["lint", "test", "build"]
