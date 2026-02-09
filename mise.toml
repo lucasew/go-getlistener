@@ -1,3 +1,12 @@
 [tools]
 go = "1.22"
 golangci-lint = "1.60.1"
+
+[tasks.lint]
+run = "golangci-lint run"
+
+[tasks.test]
+run = "go test -v ./..."
+
+[tasks.ci]
+depends = ["lint", "test"]
