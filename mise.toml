@@ -3,13 +3,22 @@ go = "1.22"
 golangci-lint = "1.60.1"
 
 [tasks.lint]
+description = "Run golangci-lint"
 run = "golangci-lint run ./..."
 
+[tasks.vet]
+description = "Run go vet"
+run = "go vet ./..."
+
 [tasks.test]
+description = "Run unit tests"
 run = "go test -v ./..."
 
 [tasks.build]
+description = "Build the project"
 run = "go build -v ./..."
 
 [tasks.ci]
-depends = ["lint", "test", "build"]
+description = "Run all CI checks"
+depends = ["lint", "vet", "test", "build"]
+run = "echo 'CI checks completed successfully'"
