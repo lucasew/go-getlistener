@@ -30,6 +30,9 @@ jobs:
       - name: Trust mise config
         run: mise trust --yes
 
+      - name: Install tools
+        run: mise install
+
       - name: Install dependencies
         run: mise run install
 
