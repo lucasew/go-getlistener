@@ -22,7 +22,16 @@ jobs:
           fetch-depth: 0
 
       - name: Install mise
-        uses: jdx/mise-action@v2
+        run: |
+          curl https://mise.run | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "$HOME/.local/share/mise/shims" >> $GITHUB_PATH
+
+      - name: Trust mise config
+        run: mise trust --yes
+
+      - name: Install tools
+        run: mise install
 
       - name: Install dependencies
         run: mise run install
