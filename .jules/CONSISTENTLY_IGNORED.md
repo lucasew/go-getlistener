@@ -33,3 +33,9 @@ This file lists patterns of changes that have been consistently rejected by huma
 **- Pattern:** Refactoring helper functions (like `listenSystemd`) to return `nil, nil` when a condition (like missing socket) is met.
 **- Justification:** Helper functions should perform a specific action and return an error on failure. Conditional logic for whether to call the helper should reside in the caller to maintain clear control flow.
 **- Files Affected:** `listener_unix.go`
+
+## IGNORE: Janitor Journal Format
+
+**- Pattern:** Adding new journal entries in .jules/janitor.md that use multiple lines or headers (e.g., ## Date).
+**- Justification:** New journal entries must be a single line starting with "- YYYY-MM-DD: " to ensure the file remains scannable. Legacy multi-line entries are preserved but should not be emulated.
+**- Files Affected:** `.jules/janitor.md`
