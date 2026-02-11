@@ -4,7 +4,7 @@ golangci-lint = "1.60.1"
 
 [tasks."lint:golangci-lint"]
 description = "Run golangci-lint"
-run = "golangci-lint run ./..."
+run = "golangci-lint run --timeout 5m ./..."
 
 [tasks."lint:vet"]
 description = "Run go vet"
@@ -28,5 +28,5 @@ run = "go mod download"
 
 [tasks.ci]
 description = "Run all CI checks"
-depends = ["lint", "test", "build"]
+depends = ["install", "lint", "test", "build"]
 run = "echo 'CI checks completed successfully'"
