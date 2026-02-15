@@ -1,6 +1,6 @@
 [tools]
 go = "1.22"
-golangci-lint = "1.60.1"
+golangci-lint = "2.9.0"
 
 [tasks."lint:golangci-lint"]
 description = "Run golangci-lint"
