@@ -33,3 +33,27 @@ This file lists patterns of changes that have been consistently rejected by huma
 **- Pattern:** Refactoring helper functions (like `listenSystemd`) to return `nil, nil` when a condition (like missing socket) is met.
 **- Justification:** Helper functions should perform a specific action and return an error on failure. Conditional logic for whether to call the helper should reside in the caller to maintain clear control flow.
 **- Files Affected:** `listener_unix.go`
+
+## IGNORE: Use jdx/mise-action in GitHub Actions
+
+**- Pattern:** Using the `jdx/mise-action` GitHub Action to install mise.
+**- Justification:** Causes persistent "Internal error" or "Build failed" with no logs in GitHub Actions. Manual installation via `curl https://mise.run | sh` is preferred and more reliable.
+**- Files Affected:** `.github/workflows/*.yml`
+
+## IGNORE: Shell-Specific Commands in mise.toml
+
+**- Pattern:** Using shell-specific commands like `mkdir -p` in `mise.toml` tasks.
+**- Justification:** Breaks cross-platform compatibility, particularly on Windows. Native tool commands (like `go build -v ./...` instead of `mkdir -p dist && ...`) must be used instead.
+**- Files Affected:** `mise.toml`
+
+## IGNORE: Multi-line Journal Entries
+
+**- Pattern:** Adding new journal entries that span multiple lines or use headers (e.g., `## Date`).
+**- Justification:** New journal entries must be a single line starting with `- YYYY-MM-DD: [insight]` to ensure the file remains scannable.
+**- Files Affected:** `.jules/*.md`
+
+## IGNORE: Out-of-Scope Code Changes by Meta-Agents
+
+**- Pattern:** Meta-agents (like Denoiser) including out-of-scope product runtime code or linter configuration changes in their PRs.
+**- Justification:** Meta-agents must strictly adhere to their designated scope (e.g., `.jules/**` files) to prevent muddying the PR's purpose and ensure changes are focused.
+**- Files Affected:** `*` (Any file outside the agent's explicit scope)
