@@ -33,3 +33,21 @@ This file lists patterns of changes that have been consistently rejected by huma
 **- Pattern:** Refactoring helper functions (like `listenSystemd`) to return `nil, nil` when a condition (like missing socket) is met.
 **- Justification:** Helper functions should perform a specific action and return an error on failure. Conditional logic for whether to call the helper should reside in the caller to maintain clear control flow.
 **- Files Affected:** `listener_unix.go`
+
+## IGNORE: Downgrading Dependencies
+
+**- Pattern:** Downgrading dependencies like `actions/checkout` to `v4` or `mise-action` to `v2` without explicit instructions.
+**- Justification:** Downgrading dependencies without being asked is explicitly prohibited by the global instructions. It undoes previous upgrades and can introduce known vulnerabilities or bugs.
+**- Files Affected:** `.github/workflows/*.yml`
+
+## IGNORE: Out-of-Scope Code Changes by Meta-Agents
+
+**- Pattern:** Meta-agents (like Denoiser, Docs, Janitor) bundling runtime/infrastructure code modifications (e.g., product runtime code, `.golangci.yml`, `mise.toml` commands, `cmd/**` changes) in their PRs.
+**- Justification:** Meta-agents must strictly adhere to their designated scope. Changing product code or linter configs during a meta-task muddies the PR's purpose and leads to consistent rejections.
+**- Files Affected:** `*` (Any file outside the agent's explicit scope)
+
+## IGNORE: Multi-line Journal Entries
+
+**- Pattern:** Adding new journal entries in agent journals (e.g., `.jules/janitor.md`, `.jules/sentinel.md`) that span multiple lines or use headers (e.g., `## Date`).
+**- Justification:** New journal entries must be a single line starting with `- YYYY-MM-DD: [insight]` to ensure the file remains scannable. Legacy multi-line entries are preserved but should not be emulated.
+**- Files Affected:** `.jules/*.md`
