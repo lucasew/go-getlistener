@@ -5,7 +5,6 @@ package getlistener
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"net"
 	"os"
 )
@@ -49,21 +48,6 @@ func listenSystemd(fd int) (net.Listener, error) {
 	f := os.NewFile(uintptr(fd), "sd_socket")
 	defer f.Close()
 	return net.FileListener(f)
-}
-
-// listenTCP creates a standard TCP listener based on the configuration.
-func listenTCP(cfg *Config) (net.Listener, error) {
-	if cfg.Port == 0 {
-		slog.Info("getlistener: PORT wasn't specified, using random one")
-	}
-	listenAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
-
-	ln, err := net.Listen("tcp", listenAddr)
-	if err != nil {
-		return nil, err
-	}
-	slog.Info("getlistener: listening on", "addr", ln.Addr())
-	return ln, nil
 }
 
 // GetListener creates a network listener.

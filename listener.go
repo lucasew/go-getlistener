@@ -66,3 +66,18 @@ func loadConfig() (*Config, error) {
 	}
 	return cfg, nil
 }
+
+// listenTCP creates a standard TCP listener based on the configuration.
+func listenTCP(cfg *Config) (net.Listener, error) {
+	if cfg.Port == 0 {
+		slog.Info("getlistener: PORT wasn't specified, using random one")
+	}
+	listenAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+
+	ln, err := net.Listen("tcp", listenAddr)
+	if err != nil {
+		return nil, err
+	}
+	slog.Info("getlistener: listening on", "addr", ln.Addr())
+	return ln, nil
+}
