@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/lucasew/go-getlistener"
 )
@@ -16,11 +17,13 @@ func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func main() {
 	ln, err := getlistener.GetListener()
 	if err != nil {
-		panic(err)
+		getlistener.ReportError(err, "failed to get listener")
+		os.Exit(1)
 	}
 	err = http.Serve(ln, Server{})
 	if err != nil {
-		panic(err)
+		getlistener.ReportError(err, "server failed")
+		os.Exit(1)
 	}
 
 }
