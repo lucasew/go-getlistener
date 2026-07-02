@@ -8,3 +8,4 @@ This journal is a record of CRITICAL refactoring learnings for this codebase. It
 **Solution:** The `init()` function was refactored to store any parsing errors in a package-level variable. The public `GetListener()` function now checks this variable upon being called and returns the error, allowing the application to handle it gracefully.
 **Pattern:** Libraries must not call `os.Exit()` or `log.Fatalf()`. Initialization or configuration errors should be captured and exposed as return values from the library's public functions.
 - 2026-06-29: Deduplicate code and move shared logic to cross-platform files.
+- 2026-07-02: Always centralize error reporting (e.g. errorhandler.ReportErrorAndExit) instead of using raw panics in application code.
