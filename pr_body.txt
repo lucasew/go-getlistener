@@ -1,0 +1,13 @@
+Assumptions:
+- Wrapping strings via concatenation (`+`) across lines is the project's preferred approach to resolving line-length warnings for string literals while preserving exactly the same compiled strings without introducing new abstraction layers.
+- The 120-character line length warning flagged by `tech-debt-tracker` is worth resolving here to improve readability, particularly for embedded system warnings that appear in logs.
+
+Alternatives Not Chosen:
+- **Silencing the linter/tracker:** Could have configured the tech-debt tracker to ignore string literals, but breaking the strings across lines natively improves long-term developer readability.
+
+How To Pivot:
+- If standard string concatenation breaks log parsers in specific contexts, this can be rolled back to single lines at the cost of readability inside the Go files.
+
+Next Knobs:
+1. Ensure other environments parsing standard `.env` ports respect multiline outputs if the logs ever emit the exact `fmt.Errorf` values back.
+2. Evaluate adjusting the tech debt scanner's long-line heuristic if it becomes noisy on comments.

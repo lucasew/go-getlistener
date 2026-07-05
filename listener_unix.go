@@ -11,9 +11,9 @@ import (
 
 var (
 	// ErrNotPassed is returned when no socket is passed via systemd socket activation.
-	ErrNotPassed       = errors.New("no socket passed")
+	ErrNotPassed = errors.New("no socket passed")
 	// ErrWrongPid is returned when the socket is passed to a different PID than the current process.
-	ErrWrongPid        = errors.New("passed the socket to a different PID")
+	ErrWrongPid = errors.New("passed the socket to a different PID")
 	// ErrUnsupportedCase is returned when the socket activation configuration is unsupported (e.g., multiple sockets).
 	ErrUnsupportedCase = errors.New("this case is unsupported")
 )
@@ -35,7 +35,8 @@ func GetSystemdSocketFD() (int, error) {
 	}
 	envListenFds := os.Getenv("LISTEN_FDS")
 	if envListenFds == "" {
-		return 0, fmt.Errorf("%w: LISTEN_PID specified but LISTEN_FDS not, this is an issue in your socket activation mechanism", ErrUnsupportedCase)
+		return 0, fmt.Errorf("%w: LISTEN_PID specified but LISTEN_FDS not, "+
+			"this is an issue in your socket activation mechanism", ErrUnsupportedCase)
 	}
 	if envListenFds != "1" {
 		return 0, fmt.Errorf("%w: this library cannot handle more than one socket being passed", ErrUnsupportedCase)
