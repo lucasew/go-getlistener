@@ -22,8 +22,8 @@ type Config struct {
 //
 // WARNING: This function is vulnerable to Time-of-Check Time-of-Use (TOCTOU) race conditions.
 // The port returned may be claimed by another process between the time it is released by this function
-// and the time it is used by the caller. It is recommended to let `net.Listen` choose a port by
-// specifying port 0, rather than using this function.
+// and the time it is used by the caller. It is recommended to let `net.Listen` choose a port by specifying port 0,
+// rather than using this function.
 func GetAvailablePort() (int, error) {
 	listener, err := net.Listen("tcp", ":0")
 	if err != nil {
@@ -50,8 +50,7 @@ func loadConfig() (*Config, error) {
 	if envPort != "" {
 		selectedPort, err := strconv.Atoi(envPort)
 		if err != nil {
-			return nil, fmt.Errorf("the environment variable PORT was provided to set up "+
-				"a port but has an invalid value: '%s'", envPort)
+			return nil, fmt.Errorf("the environment variable PORT was provided to set up a port but has an invalid value: '%s'", envPort)
 		}
 		cfg.Port = selectedPort
 	}
@@ -60,8 +59,7 @@ func loadConfig() (*Config, error) {
 		cfg.Host = envHost
 		if cfg.Host != "127.0.0.1" && cfg.Host != "localhost" {
 			slog.Warn(
-				"SECURITY WARNING: The HOST environment variable is set to a non-local address, "+
-					"which may expose the service to the network. Please ensure this is intentional.",
+				"SECURITY WARNING: The HOST environment variable is set to a non-local address, which may expose the service to the network. Please ensure this is intentional.",
 				"host", cfg.Host,
 			)
 		}
