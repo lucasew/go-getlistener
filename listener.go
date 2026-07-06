@@ -50,7 +50,8 @@ func loadConfig() (*Config, error) {
 	if envPort != "" {
 		selectedPort, err := strconv.Atoi(envPort)
 		if err != nil {
-			return nil, fmt.Errorf("the environment variable PORT was provided to set up a port but has an invalid value: '%s'", envPort)
+			return nil, fmt.Errorf("the environment variable PORT was provided to set up a port "+
+				"but has an invalid value: '%s'", envPort)
 		}
 		cfg.Port = selectedPort
 	}
@@ -59,7 +60,8 @@ func loadConfig() (*Config, error) {
 		cfg.Host = envHost
 		if cfg.Host != "127.0.0.1" && cfg.Host != "localhost" {
 			slog.Warn(
-				"SECURITY WARNING: The HOST environment variable is set to a non-local address, which may expose the service to the network. Please ensure this is intentional.",
+				"SECURITY WARNING: The HOST environment variable is set to a non-local address, " +
+					"which may expose the service to the network. Please ensure this is intentional.",
 				"host", cfg.Host,
 			)
 		}
