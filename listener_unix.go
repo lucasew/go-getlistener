@@ -50,15 +50,8 @@ func listenSystemd(fd int) (net.Listener, error) {
 	return net.FileListener(f)
 }
 
-// GetListener creates a network listener.
-//
-// It prioritizes systemd socket activation if available.
-// If not, it falls back to creating a standard TCP listener based on the configuration (HOST/PORT).
-func GetListener() (net.Listener, error) {
-	cfg, err := loadConfig()
-	if err != nil {
-		return nil, err
-	}
+// getListenerPlatform creates a network listener based on the platform-specific logic.
+func getListenerPlatform(cfg *Config) (net.Listener, error) {
 	sdSocket, err := GetSystemdSocketFD()
 	if err != nil && !errors.Is(err, ErrNotPassed) {
 		return nil, err
