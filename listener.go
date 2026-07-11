@@ -81,3 +81,15 @@ func listenTCP(cfg *Config) (net.Listener, error) {
 	slog.Info("getlistener: listening on", "addr", ln.Addr())
 	return ln, nil
 }
+
+// GetListener creates a network listener.
+//
+// It loads the configuration and prioritizes systemd socket activation if available.
+// If not, it falls back to creating a standard TCP listener based on the configuration (HOST/PORT).
+func GetListener() (net.Listener, error) {
+	cfg, err := loadConfig()
+	if err != nil {
+		return nil, err
+	}
+	return getListenerPlatform(cfg)
+}
