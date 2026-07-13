@@ -18,22 +18,6 @@ type Config struct {
 	Port int
 }
 
-// GetAvailablePort returns the number of an available TCP port.
-//
-// WARNING: This function is vulnerable to Time-of-Check Time-of-Use (TOCTOU) race conditions.
-// The port returned may be claimed by another process between the time it is released by this function
-// and the time it is used by the caller. It is recommended to let `net.Listen` choose a port by specifying port 0,
-// rather than using this function.
-func GetAvailablePort() (int, error) {
-	listener, err := net.Listen("tcp", ":0")
-	if err != nil {
-		return 0, err
-	}
-	defer listener.Close()
-	addr := listener.Addr().(*net.TCPAddr)
-	return addr.Port, nil
-}
-
 // loadConfig loads the configuration from environment variables.
 //
 // It checks for the following environment variables:
