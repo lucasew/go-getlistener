@@ -2,25 +2,23 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/lucasew/go-getlistener"
 )
 
-type Server struct{}
-
-func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "works!")
-}
-
 func main() {
 	ln, err := getlistener.GetListener()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	err = http.Serve(ln, Server{})
-	if err != nil {
-		panic(err)
-	}
+	log.Printf("serving on %s", ln.Addr())
 
+	err = http.Serve(ln, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "works!")
+	}))
+	if err != nil {
+		log.Fatal(err)
+	}
 }
