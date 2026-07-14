@@ -4,7 +4,7 @@ golangci-lint = "1.60.1"
 
 [tasks."lint:golangci-lint"]
 description = "Run golangci-lint"
-run = "golangci-lint run ./..."
+run = "golangci-lint run --timeout 5m ./..."
 
 [tasks."lint:vet"]
 description = "Run go vet"
@@ -22,11 +22,15 @@ run = "go test -v ./..."
 description = "Build the project"
 run = "go build -v ./..."
 
+[tasks."build:windows"]
+description = "Cross-compile for Windows (catch //go:build windows breaks)"
+run = "GOOS=windows go build -v ./..."
+
 [tasks.install]
 description = "Install dependencies"
 run = "go mod download"
 
 [tasks.ci]
 description = "Run all CI checks"
-depends = ["lint", "test", "build"]
+depends = ["lint", "test", "build", "build:windows"]
 run = "echo 'CI checks completed successfully'"
