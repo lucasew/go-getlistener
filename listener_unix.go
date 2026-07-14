@@ -35,7 +35,8 @@ func GetSystemdSocketFD() (int, error) {
 	}
 	envListenFds := os.Getenv("LISTEN_FDS")
 	if envListenFds == "" {
-		return 0, fmt.Errorf("%w: LISTEN_PID specified but LISTEN_FDS not, this is an issue in your socket activation mechanism", ErrUnsupportedCase)
+		return 0, fmt.Errorf("%w: LISTEN_PID specified but LISTEN_FDS not, "+
+			"this is an issue in your socket activation mechanism", ErrUnsupportedCase)
 	}
 	if envListenFds != "1" {
 		return 0, fmt.Errorf("%w: this library cannot handle more than one socket being passed", ErrUnsupportedCase)
