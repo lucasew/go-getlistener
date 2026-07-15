@@ -18,13 +18,17 @@ depends = ["lint:golangci-lint", "lint:vet"]
 description = "Run unit tests"
 run = "go test -v ./..."
 
-[tasks.build]
-description = "Build the project"
+[tasks."build:native"]
+description = "Build for the host OS"
 run = "go build -v ./..."
 
 [tasks."build:windows"]
 description = "Cross-compile for Windows (catch //go:build windows breaks)"
 run = "GOOS=windows go build -v ./..."
+
+[tasks.build]
+description = "Build all targets (build:*)"
+depends = ["build:*"]
 
 [tasks.install]
 description = "Install dependencies"
@@ -32,5 +36,5 @@ run = "go mod download"
 
 [tasks.ci]
 description = "Run all CI checks"
-depends = ["lint", "test", "build", "build:windows"]
+depends = ["lint", "test", "build"]
 run = "echo 'CI checks completed successfully'"
