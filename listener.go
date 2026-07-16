@@ -56,7 +56,8 @@ func listenTCP(cfg *Config) (net.Listener, error) {
 	if cfg.Port == 0 {
 		slog.Info("getlistener: PORT wasn't specified, using random one")
 	}
-	listenAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	// JoinHostPort brackets IPv6 hosts (::1 → [::1]:port); bare "%s:%d" does not.
+	listenAddr := net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port))
 
 	ln, err := net.Listen("tcp", listenAddr)
 	if err != nil {
