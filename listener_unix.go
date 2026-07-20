@@ -7,13 +7,14 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"syscall"
 )
 
 var (
 	// ErrNotPassed is returned when no socket is passed via systemd socket activation.
-	ErrNotPassed       = errors.New("no socket passed")
+	ErrNotPassed = errors.New("no socket passed")
 	// ErrWrongPid is returned when the socket is passed to a different PID than the current process.
-	ErrWrongPid        = errors.New("passed the socket to a different PID")
+	ErrWrongPid = errors.New("passed the socket to a different PID")
 	// ErrUnsupportedCase is returned when the socket activation configuration is unsupported (e.g., multiple sockets).
 	ErrUnsupportedCase = errors.New("this case is unsupported")
 )
@@ -22,6 +23,9 @@ var (
 //
 // It validates the environment variables LISTEN_PID and LISTEN_FDS to ensure
 // that the socket was intended for this process and that the configuration is supported.
+//
+// On success it unsets LISTEN_PID, LISTEN_FDS, and LISTEN_FDNAMES so child
+// processes do not re-inherit socket activation state (systemd convention).
 //
 // Returns 0 if no socket was passed (ErrNotPassed).
 // Returns an error if the configuration is invalid or unsupported.
@@ -38,16 +42,26 @@ func GetSystemdSocketFD() (int, error) {
 		return 0, fmt.Errorf("%w: LISTEN_PID specified but LISTEN_FDS not, this is an issue in your socket activation mechanism", ErrUnsupportedCase)
 	}
 	if envListenFds != "1" {
-		return 0, fmt.Errorf("%w: this library cannot handle more than one socket being passed", ErrUnsupportedCase)
+		return 0, fmt.Errorf("%w: LISTEN_FDS=%q (only exactly one socket is supported)", ErrUnsupportedCase, envListenFds)
 	}
+	// Drop activation env after a successful claim so children cannot re-take FDs.
+	os.Unsetenv("LISTEN_PID")
+	os.Unsetenv("LISTEN_FDS")
+	os.Unsetenv("LISTEN_FDNAMES")
 	return 3, nil
 }
 
 // listenSystemd creates a listener from a systemd socket file descriptor.
 func listenSystemd(fd int) (net.Listener, error) {
+	// Systemd passes FDs without CLOEXEC; set it so they are not leaked across exec.
+	syscall.CloseOnExec(fd)
 	f := os.NewFile(uintptr(fd), "sd_socket")
 	defer f.Close()
-	return net.FileListener(f)
+	ln, err := net.FileListener(f)
+	if err != nil {
+		return nil, fmt.Errorf("systemd socket FileListener: %w", err)
+	}
+	return ln, nil
 }
 
 // getListenerPlatform creates a network listener based on the platform-specific logic.
