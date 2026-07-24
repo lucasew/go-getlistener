@@ -18,6 +18,18 @@ type Config struct {
 	Port int
 }
 
+
+// isLocalHost reports whether host is a loopback name or IP.
+// Unspecified bind addresses (0.0.0.0, ::) are treated as non-local because
+// they expose the service on all interfaces.
+func isLocalHost(host string) bool {
+	if host == "localhost" {
+		return true
+	}
+	ip := net.ParseIP(host)
+	return ip != nil && ip.IsLoopback()
+}
+
 // loadConfig loads the configuration from environment variables.
 //
 // It checks for the following environment variables:
@@ -36,12 +48,15 @@ func loadConfig() (*Config, error) {
 		if err != nil {
 			return nil, fmt.Errorf("the environment variable PORT was provided to set up a port but has an invalid value: '%s'", envPort)
 		}
+		if selectedPort < 0 || selectedPort > 65535 {
+			return nil, fmt.Errorf("the environment variable PORT was provided to set up a port but has an invalid value: '%s'", envPort)
+		}
 		cfg.Port = selectedPort
 	}
 	envHost := os.Getenv("HOST")
 	if envHost != "" {
 		cfg.Host = envHost
-		if cfg.Host != "127.0.0.1" && cfg.Host != "localhost" {
+		if !isLocalHost(cfg.Host) {
 			slog.Warn(
 				"SECURITY WARNING: The HOST environment variable is set to a non-local address, which may expose the service to the network. Please ensure this is intentional.",
 				"host", cfg.Host,
