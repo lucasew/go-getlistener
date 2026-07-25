@@ -25,8 +25,12 @@ func main() {
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "works!")
 		}),
-		// Bound header read so idle/slow clients cannot hold connections open forever.
+		// Bound request/response lifetimes so slow or idle clients cannot hold
+		// connections open forever (ReadHeaderTimeout alone is not enough).
 		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       60 * time.Second,
 	}
 
 	// systemd and interactive runs both send SIGTERM/SIGINT for a clean stop.
