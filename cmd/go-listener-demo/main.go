@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -21,6 +22,10 @@ func main() {
 	}
 	log.Printf("serving on %s", ln.Addr())
 
+	// systemd and interactive runs both send SIGTERM/SIGINT for a clean stop.
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	srv := &http.Server{
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "works!")
@@ -31,11 +36,12 @@ func main() {
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,
 		IdleTimeout:       60 * time.Second,
+		// Cancel r.Context() on SIGTERM/SIGINT so handlers that respect
+		// request context can exit before Shutdown's deadline.
+		BaseContext: func(net.Listener) context.Context {
+			return ctx
+		},
 	}
-
-	// systemd and interactive runs both send SIGTERM/SIGINT for a clean stop.
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
 
 	errCh := make(chan error, 1)
 	go func() {
