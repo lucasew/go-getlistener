@@ -16,9 +16,17 @@ import (
 )
 
 func main() {
+	// log.Fatal calls os.Exit and skips defers; keep it only after run returns
+	// so signal.NotifyContext stop and shutdown cancel always run.
+	if err := run(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func run() error {
 	ln, err := getlistener.GetListener()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	log.Printf("serving on %s", ln.Addr())
 
@@ -58,14 +66,10 @@ func main() {
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		if err := srv.Shutdown(shutdownCtx); err != nil {
-			log.Fatal(err)
+			return err
 		}
-		if err := <-errCh; err != nil {
-			log.Fatal(err)
-		}
+		return <-errCh
 	case err := <-errCh:
-		if err != nil {
-			log.Fatal(err)
-		}
+		return err
 	}
 }
