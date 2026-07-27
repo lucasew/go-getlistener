@@ -62,7 +62,7 @@ func listenTCP(cfg *Config) (net.Listener, error) {
 
 	ln, err := net.Listen("tcp", listenAddr)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("listen tcp %s: %w", listenAddr, err)
 	}
 	slog.Info("getlistener: listening on", "addr", ln.Addr())
 	return ln, nil
