@@ -4,18 +4,47 @@ package getlistener
 
 import (
 	"errors"
-	"fmt"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 	"syscall"
 	"testing"
 )
 
+// activationEnvKeys is the LISTEN_* trio clearSystemdActivationEnv drops.
+var activationEnvKeys = []string{"LISTEN_PID", "LISTEN_FDS", "LISTEN_FDNAMES"}
+
+// setSelfActivationEnv points activation at this process (optional FDNAMES).
+func setSelfActivationEnv(t *testing.T, fds, fdNames string) {
+	t.Helper()
+	t.Setenv("LISTEN_PID", strconv.Itoa(os.Getpid()))
+	t.Setenv("LISTEN_FDS", fds)
+	if fdNames != "" {
+		t.Setenv("LISTEN_FDNAMES", fdNames)
+	}
+}
+
+func assertActivationEnvEmpty(t *testing.T) {
+	t.Helper()
+	for _, key := range activationEnvKeys {
+		if got := os.Getenv(key); got != "" {
+			t.Errorf("%s still set to %q after successful claim", key, got)
+		}
+	}
+}
+
+func assertActivationEnvSet(t *testing.T) {
+	t.Helper()
+	for _, key := range activationEnvKeys {
+		if got := os.Getenv(key); got == "" {
+			t.Errorf("%s cleared by parseSystemdListenFD; want preserved until listen succeeds", key)
+		}
+	}
+}
+
 func TestGetSystemdSocketFD_ClearsActivationEnv(t *testing.T) {
-	t.Setenv("LISTEN_PID", fmt.Sprintf("%d", os.Getpid()))
-	t.Setenv("LISTEN_FDS", "1")
-	t.Setenv("LISTEN_FDNAMES", "app.socket")
+	setSelfActivationEnv(t, "1", "app.socket")
 
 	fd, err := GetSystemdSocketFD()
 	if err != nil {
@@ -24,16 +53,11 @@ func TestGetSystemdSocketFD_ClearsActivationEnv(t *testing.T) {
 	if fd != 3 {
 		t.Errorf("fd = %d, want 3", fd)
 	}
-	for _, key := range []string{"LISTEN_PID", "LISTEN_FDS", "LISTEN_FDNAMES"} {
-		if got := os.Getenv(key); got != "" {
-			t.Errorf("%s still set to %q after successful claim", key, got)
-		}
-	}
+	assertActivationEnvEmpty(t)
 }
 
 func TestGetSystemdSocketFD_ZeroFdsMessage(t *testing.T) {
-	t.Setenv("LISTEN_PID", fmt.Sprintf("%d", os.Getpid()))
-	t.Setenv("LISTEN_FDS", "0")
+	setSelfActivationEnv(t, "0", "")
 
 	fd, err := GetSystemdSocketFD()
 	if fd != 0 {
@@ -70,9 +94,7 @@ func TestGetSystemdSocketFD_KeepsEnvOnError(t *testing.T) {
 
 func TestParseSystemdListenFD_DoesNotClearEnv(t *testing.T) {
 	// GetListener clears only after FileListener succeeds; parse must be side-effect free.
-	t.Setenv("LISTEN_PID", fmt.Sprintf("%d", os.Getpid()))
-	t.Setenv("LISTEN_FDS", "1")
-	t.Setenv("LISTEN_FDNAMES", "app.socket")
+	setSelfActivationEnv(t, "1", "app.socket")
 
 	fd, err := parseSystemdListenFD()
 	if err != nil {
@@ -81,11 +103,7 @@ func TestParseSystemdListenFD_DoesNotClearEnv(t *testing.T) {
 	if fd != 3 {
 		t.Errorf("fd = %d, want 3", fd)
 	}
-	for _, key := range []string{"LISTEN_PID", "LISTEN_FDS", "LISTEN_FDNAMES"} {
-		if got := os.Getenv(key); got == "" {
-			t.Errorf("%s cleared by parseSystemdListenFD; want preserved until listen succeeds", key)
-		}
-	}
+	assertActivationEnvSet(t)
 }
 
 func TestListenSystemd_NonSocket(t *testing.T) {
