@@ -24,7 +24,7 @@ pass from code.
 
 | Variable | Meaning | Default |
 |----------|---------|---------|
-| `PORT` | TCP port to bind. `0` or unset picks an ephemeral port. Non-numeric values are an error (the bad value is included in the message). | unset → ephemeral |
+| `PORT` | TCP port to bind. `0` or unset picks an ephemeral port. Non-numeric values and values outside `0`–`65535` are an error (the bad value is included in the message). | unset → ephemeral |
 | `HOST` | Address to bind. Non-loopback values log a security warning via `log/slog`. | `127.0.0.1` |
 
 Bound address after listen: `ln.Addr()`.
