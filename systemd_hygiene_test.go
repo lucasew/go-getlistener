@@ -75,6 +75,40 @@ func TestGetSystemdSocketFD_ZeroFdsMessage(t *testing.T) {
 	}
 }
 
+func TestGetSystemdSocketFD_MissingFds(t *testing.T) {
+	// LISTEN_PID set without LISTEN_FDS is a broken activation handoff.
+	t.Setenv("LISTEN_PID", strconv.Itoa(os.Getpid()))
+	t.Setenv("LISTEN_FDS", "")
+	t.Setenv("LISTEN_FDNAMES", "")
+
+	fd, err := GetSystemdSocketFD()
+	if fd != 0 {
+		t.Errorf("fd = %d, want 0", fd)
+	}
+	if !errors.Is(err, ErrUnsupportedCase) {
+		t.Fatalf("err = %v, want ErrUnsupportedCase", err)
+	}
+	// Failed claim must leave activation env intact.
+	if got := os.Getenv("LISTEN_PID"); got == "" {
+		t.Error("LISTEN_PID cleared on missing LISTEN_FDS error")
+	}
+}
+
+func TestGetSystemdSocketFD_MultipleFds(t *testing.T) {
+	setSelfActivationEnv(t, "2", "")
+
+	fd, err := GetSystemdSocketFD()
+	if fd != 0 {
+		t.Errorf("fd = %d, want 0", fd)
+	}
+	if !errors.Is(err, ErrUnsupportedCase) {
+		t.Fatalf("err = %v, want ErrUnsupportedCase", err)
+	}
+	if got := os.Getenv("LISTEN_FDS"); got != "2" {
+		t.Errorf("LISTEN_FDS cleared on multi-socket error, got %q", got)
+	}
+}
+
 func TestGetSystemdSocketFD_KeepsEnvOnError(t *testing.T) {
 	// Failed claim must not clear env (caller may inspect / retry policy).
 	t.Setenv("LISTEN_PID", "1")
