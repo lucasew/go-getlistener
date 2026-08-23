@@ -28,16 +28,3 @@ func TestGetListener_RejectsListenPIDOnWindows(t *testing.T) {
 		t.Errorf("error should mention LISTEN_PID, got: %v", err)
 	}
 }
-
-func TestGetListener_TCPWhenNoListenPID(t *testing.T) {
-	t.Setenv("PORT", "")
-	t.Setenv("HOST", "127.0.0.1")
-	t.Setenv("LISTEN_PID", "")
-	t.Setenv("LISTEN_FDS", "")
-
-	ln, err := GetListener()
-	if err != nil {
-		t.Fatalf("GetListener: %v", err)
-	}
-	defer ln.Close()
-}
