@@ -43,6 +43,16 @@ func assertActivationEnvSet(t *testing.T) {
 	}
 }
 
+func assertUnsupportedActivation(t *testing.T, fd int, err error) {
+	t.Helper()
+	if fd != 0 {
+		t.Errorf("fd = %d, want 0", fd)
+	}
+	if !errors.Is(err, ErrUnsupportedCase) {
+		t.Fatalf("err = %v, want ErrUnsupportedCase", err)
+	}
+}
+
 func TestGetSystemdSocketFD_ClearsActivationEnv(t *testing.T) {
 	setSelfActivationEnv(t, "1", "app.socket")
 
@@ -60,12 +70,7 @@ func TestGetSystemdSocketFD_ZeroFdsMessage(t *testing.T) {
 	setSelfActivationEnv(t, "0", "")
 
 	fd, err := GetSystemdSocketFD()
-	if fd != 0 {
-		t.Errorf("fd = %d, want 0", fd)
-	}
-	if !errors.Is(err, ErrUnsupportedCase) {
-		t.Fatalf("err = %v, want ErrUnsupportedCase", err)
-	}
+	assertUnsupportedActivation(t, fd, err)
 	// Zero sockets must not be described as "more than one".
 	if strings.Contains(err.Error(), "more than one") {
 		t.Errorf("misleading multi-socket wording for LISTEN_FDS=0: %v", err)
@@ -77,17 +82,10 @@ func TestGetSystemdSocketFD_ZeroFdsMessage(t *testing.T) {
 
 func TestGetSystemdSocketFD_MissingFds(t *testing.T) {
 	// LISTEN_PID set without LISTEN_FDS is a broken activation handoff.
-	t.Setenv("LISTEN_PID", strconv.Itoa(os.Getpid()))
-	t.Setenv("LISTEN_FDS", "")
-	t.Setenv("LISTEN_FDNAMES", "")
+	setSelfActivationEnv(t, "", "")
 
 	fd, err := GetSystemdSocketFD()
-	if fd != 0 {
-		t.Errorf("fd = %d, want 0", fd)
-	}
-	if !errors.Is(err, ErrUnsupportedCase) {
-		t.Fatalf("err = %v, want ErrUnsupportedCase", err)
-	}
+	assertUnsupportedActivation(t, fd, err)
 	// Failed claim must leave activation env intact.
 	if got := os.Getenv("LISTEN_PID"); got == "" {
 		t.Error("LISTEN_PID cleared on missing LISTEN_FDS error")
@@ -98,12 +96,7 @@ func TestGetSystemdSocketFD_MultipleFds(t *testing.T) {
 	setSelfActivationEnv(t, "2", "")
 
 	fd, err := GetSystemdSocketFD()
-	if fd != 0 {
-		t.Errorf("fd = %d, want 0", fd)
-	}
-	if !errors.Is(err, ErrUnsupportedCase) {
-		t.Fatalf("err = %v, want ErrUnsupportedCase", err)
-	}
+	assertUnsupportedActivation(t, fd, err)
 	if got := os.Getenv("LISTEN_FDS"); got != "2" {
 		t.Errorf("LISTEN_FDS cleared on multi-socket error, got %q", got)
 	}
