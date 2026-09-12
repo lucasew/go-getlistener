@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strconv"
 	"syscall"
 )
 
@@ -24,8 +25,14 @@ func parseSystemdListenFD() (int, error) {
 	if envListenPid == "" {
 		return 0, ErrNotPassed
 	}
-	if envListenPid != fmt.Sprintf("%d", os.Getpid()) {
-		return 0, fmt.Errorf("%w: %s instead of %d", ErrWrongPid, envListenPid, os.Getpid())
+	// Compare as integers so non-numeric LISTEN_PID is not mislabeled as a
+	// wrong-PID handoff (and so strconv is preferred over fmt.Sprintf).
+	pid, err := strconv.Atoi(envListenPid)
+	if err != nil {
+		return 0, fmt.Errorf("%w: LISTEN_PID=%q: %w", ErrUnsupportedCase, envListenPid, err)
+	}
+	if pid != os.Getpid() {
+		return 0, fmt.Errorf("%w: %d instead of %d", ErrWrongPid, pid, os.Getpid())
 	}
 	envListenFds := os.Getenv("LISTEN_FDS")
 	if envListenFds == "" {
