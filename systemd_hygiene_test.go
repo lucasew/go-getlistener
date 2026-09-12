@@ -25,21 +25,30 @@ func setSelfActivationEnv(t *testing.T, fds, fdNames string) {
 	}
 }
 
-func assertActivationEnvEmpty(t *testing.T) {
+func assertActivationEnv(t *testing.T, wantSet bool) {
 	t.Helper()
 	for _, key := range activationEnvKeys {
-		if got := os.Getenv(key); got != "" {
+		got := os.Getenv(key)
+		if wantSet {
+			if got == "" {
+				t.Errorf("%s cleared by parseSystemdListenFD; want preserved until listen succeeds", key)
+			}
+			continue
+		}
+		if got != "" {
 			t.Errorf("%s still set to %q after successful claim", key, got)
 		}
 	}
 }
 
-func assertActivationEnvSet(t *testing.T) {
+func mustActivationFD(t *testing.T, claim func() (int, error)) {
 	t.Helper()
-	for _, key := range activationEnvKeys {
-		if got := os.Getenv(key); got == "" {
-			t.Errorf("%s cleared by parseSystemdListenFD; want preserved until listen succeeds", key)
-		}
+	fd, err := claim()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if fd != 3 {
+		t.Errorf("fd = %d, want 3", fd)
 	}
 }
 
@@ -55,15 +64,8 @@ func assertUnsupportedActivation(t *testing.T, fd int, err error) {
 
 func TestGetSystemdSocketFD_ClearsActivationEnv(t *testing.T) {
 	setSelfActivationEnv(t, "1", "app.socket")
-
-	fd, err := GetSystemdSocketFD()
-	if err != nil {
-		t.Fatalf("GetSystemdSocketFD: %v", err)
-	}
-	if fd != 3 {
-		t.Errorf("fd = %d, want 3", fd)
-	}
-	assertActivationEnvEmpty(t)
+	mustActivationFD(t, GetSystemdSocketFD)
+	assertActivationEnv(t, false)
 }
 
 func TestGetSystemdSocketFD_ZeroFdsMessage(t *testing.T) {
@@ -122,15 +124,8 @@ func TestGetSystemdSocketFD_KeepsEnvOnError(t *testing.T) {
 func TestParseSystemdListenFD_DoesNotClearEnv(t *testing.T) {
 	// GetListener clears only after FileListener succeeds; parse must be side-effect free.
 	setSelfActivationEnv(t, "1", "app.socket")
-
-	fd, err := parseSystemdListenFD()
-	if err != nil {
-		t.Fatalf("parseSystemdListenFD: %v", err)
-	}
-	if fd != 3 {
-		t.Errorf("fd = %d, want 3", fd)
-	}
-	assertActivationEnvSet(t)
+	mustActivationFD(t, parseSystemdListenFD)
+	assertActivationEnv(t, true)
 }
 
 func TestListenSystemd_NonSocket(t *testing.T) {
