@@ -38,6 +38,9 @@ func loadConfig() (*Config, error) {
 			// parse cause so callers can use errors.As/Unwrap on *strconv.NumError.
 			return nil, fmt.Errorf("the environment variable PORT was provided to set up a port but has an invalid value: '%s': %w", envPort, err)
 		}
+		if selectedPort < 0 || selectedPort > 65535 {
+			return nil, fmt.Errorf("the environment variable PORT was provided to set up a port but has an invalid value: '%s'", envPort)
+		}
 		cfg.Port = selectedPort
 	}
 	envHost := os.Getenv("HOST")
